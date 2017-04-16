@@ -23,9 +23,8 @@ namespace TsT
 		private System.Windows.Forms.ColumnHeader BranchHeader;
 		private System.Windows.Forms.ColumnHeader StateHeader;
 		private System.Windows.Forms.MenuStrip menuStrip1;
-		private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
-		private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
-	
+		public System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
+
 		/// <summary>
 		/// Disposes resources used by the form.
 		/// </summary>
@@ -51,7 +50,6 @@ namespace TsT
 			this.StateHeader = new System.Windows.Forms.ColumnHeader();
 			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
 			this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.LogView = new System.Windows.Forms.TextBox();
 			((System.ComponentModel.ISupportInitialize)(this.MainSplit)).BeginInit();
 			this.MainSplit.Panel1.SuspendLayout();
@@ -112,6 +110,7 @@ namespace TsT
 			this.PluginsList.TabIndex = 0;
 			this.PluginsList.UseCompatibleStateImageBehavior = false;
 			this.PluginsList.View = System.Windows.Forms.View.Details;
+		    this.PluginsList.HideSelection = false;
 			// 
 			// KeyHeader
 			// 
@@ -145,19 +144,11 @@ namespace TsT
 			// 
 			// fileToolStripMenuItem
 			// 
-			this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-			this.openToolStripMenuItem});
+			this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {});
 			this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
 			this.fileToolStripMenuItem.Size = new System.Drawing.Size(35, 20);
 			this.fileToolStripMenuItem.Text = "File";
-			// 
-			// openToolStripMenuItem
-			// 
-			this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-			this.openToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
-			this.openToolStripMenuItem.Text = "Open";
-			this.openToolStripMenuItem.Click += new System.EventHandler(this.OpenToolStripMenuItemClick);
-			// 
+			//
 			// LogView
 			// 
 			this.LogView.Dock = System.Windows.Forms.DockStyle.Fill;

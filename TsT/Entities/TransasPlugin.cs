@@ -11,6 +11,9 @@ namespace TsT.Entities
         public readonly string PomPath;
         private readonly PomWrapper _pomWrapper;
         private bool _enabled = false;
+        private string _branch = "";
+
+        public string RelativePath { get; set; }
 
         public bool Enabled
         {
@@ -19,6 +22,16 @@ namespace TsT.Entities
             {
                 _enabled = value;
                 OnPropertyChanged("enabled");
+            }
+        }
+
+        public string Branch
+        {
+            get { return _branch; }
+            set
+            {
+                _branch = value;
+                OnPropertyChanged("branch");
             }
         }
 

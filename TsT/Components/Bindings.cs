@@ -6,6 +6,10 @@ namespace TsT.Components
     {
         public override void Load()
         {
+            Bind<Logger>().To<Logger>().InSingletonScope();
+            Bind<Config>().To<Config>().InSingletonScope();
+            Bind<MainForm>().To<MainForm>().InSingletonScope();
+            Bind<PluginManager>().To<PluginManager>().InSingletonScope();
         }
     }
 }

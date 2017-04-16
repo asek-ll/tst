@@ -79,17 +79,23 @@
   <ItemGroup>
     <Compile Include="Components\Bindings.cs" />
     <Compile Include="Components\Config.cs" />
-    <Compile Include="Components\JiraManager.cs" />
-    <Compile Include="Components\JiraRestApiHelper.cs" />
+    <Compile Include="Components\IPlugin.cs" />
     <Compile Include="Components\LogEventArgs.cs" />
     <Compile Include="Components\Logger.cs" />
+    <Compile Include="Components\PluginManager.cs" />
     <Compile Include="Entities\PomHelper.cs" />
-    <Compile Include="Entities\ParentProject.cs" />
     <Compile Include="Entities\TransasPlugin.cs" />
     <Compile Include="MainForm.cs" />
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Plugins\ClientProxy\ClientProxyPlugin.cs" />
+    <Compile Include="Plugins\ClientProxy\ProxyManager.cs" />
+    <Compile Include="Plugins\Jira\JiraManager.cs" />
+    <Compile Include="Plugins\Jira\JiraPlugin.cs" />
+    <Compile Include="Plugins\Jira\JiraRestApiHelper.cs" />
+    <Compile Include="Plugins\Mvn\ParentProject.cs" />
+    <Compile Include="Plugins\Mvn\PomReader.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
@@ -112,7 +118,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Entities" />
-    <Folder Include="Components" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

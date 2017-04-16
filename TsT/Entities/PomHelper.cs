@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 
 namespace TsT.Entities
@@ -9,9 +12,11 @@ namespace TsT.Entities
     {
         private readonly XElement _projectElement;
         private readonly XNamespace _ns = "http://maven.apache.org/POM/4.0.0";
+        public readonly FileInfo PomFileInfo;
 
         public PomWrapper(string filePath)
         {
+            PomFileInfo = new FileInfo(filePath);
             var document = XDocument.Parse(File.ReadAllText(filePath));
             _projectElement = document.Root;
         }
