@@ -13,12 +13,13 @@ namespace TsT.Entities
         private readonly XElement _projectElement;
         private readonly XNamespace _ns = "http://maven.apache.org/POM/4.0.0";
         public readonly FileInfo PomFileInfo;
+        private readonly XDocument _document;
 
         public PomWrapper(string filePath)
         {
             PomFileInfo = new FileInfo(filePath);
-            var document = XDocument.Parse(File.ReadAllText(filePath));
-            _projectElement = document.Root;
+            _document = XDocument.Parse(File.ReadAllText(filePath));
+            _projectElement = _document.Root;
         }
 
         public string GetArtifactId()
@@ -59,6 +60,40 @@ namespace TsT.Entities
             return modulePathes;
         }
 
+        public void RemoveModule(string modulePath)
+        {
+            var modules = _projectElement.Element(_ns + "modules");
+
+            if (modules == null)
+            {
+                var profiles = _projectElement.Element(_ns + "profiles");
+
+                if (profiles != null)
+                {
+                    var firstProfile = profiles.Elements(_ns + "profile").First();
+                    if (firstProfile != null)
+                    {
+
+                        modules = firstProfile.Element(_ns + "modules");
+                    }
+                }
+
+
+            }
+
+            if (modules != null)
+            {
+                foreach(var module in modules.Elements(_ns + "module"))
+                {
+                    var content = module.FirstNode.ToString();
+                    if (content == modulePath)
+                    {
+                        module.Remove();
+                    }
+                }
+            }
+        }
+
         public IEnumerable<string> GetModules()
         {
             var modulePathes = new List<string>();
@@ -75,5 +110,40 @@ namespace TsT.Entities
 
             return modulePathes;
         }
+
+        public void AddModule(string module)
+        {
+            var modules = _projectElement.Element(_ns + "modules");
+
+            if (modules == null)
+            {
+                var profiles = _projectElement.Element(_ns + "profiles");
+
+                if (profiles != null)
+                {
+                    var firstProfile = profiles.Elements(_ns + "profile").First();
+                    if (firstProfile != null)
+                    {
+
+                        modules = firstProfile.Element(_ns + "modules");
+                    }
+                }
+
+
+            }
+
+            if (modules != null)
+            {
+                var newModule = new XElement(_ns + "module");
+                newModule.AddFirst(module);
+                modules.Add(newModule);
+            }
+        }
+
+        public void Save(string filename)
+        {
+            _document.Save(filename);
+        }
+
     }
 }

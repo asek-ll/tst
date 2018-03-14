@@ -10,84 +10,159 @@ namespace TsT
 {
     public partial class MainForm : Form
     {
-        private readonly PluginManager _pluginManager;
+        private readonly PluginModuleManager _pluginModuleManager;
         private int _top;
+        private Logger _logger;
 
-        public MainForm(Logger logger, PluginManager pluginManager)
+        public MainForm(Logger logger, PluginModuleManager pluginModuleManager)
         {
             InitializeComponent();
-            _pluginManager = pluginManager;
+            _pluginModuleManager = pluginModuleManager;
 
-            _pluginManager.PluginsUpdated += RenderPlugins;
+            _pluginModuleManager.PluginsUpdated += RenderPluginsModule;
 
-            RenderPlugins(_pluginManager.Plugins);
+            RenderPluginsModule(_pluginModuleManager.Plugins);
 
-            logger.OnLogging += (s, e) =>
-            {
-                LogView.AppendText(e.Message + Environment.NewLine);
-                LogView.ScrollToCaret();
-            };
+            logger.OnLogging += OnLogging;
+
+            _logger = logger;
         }
 
         public void AddAction(string name, Action action)
         {
+            var parent = MainSplit.Panel2;
             var button = new Button
             {
                 Text = name,
-                Dock = DockStyle.Top,
-                Location = new Point(0, _top)
+                Dock = DockStyle.None,
+                Location = new Point(0, _top),
+                Font = new Font("Consolas", 14),
+                Anchor = AnchorStyles.Right | AnchorStyles.Left | AnchorStyles.Top,
+                Width = parent.Width,
+                Height = 30,
             };
-            button.Click += (x, y) => action.Invoke();
-            _top += 24;
-            MainSplit.Panel2.Controls.Add(button);
+            button.Click += (x, y) =>
+            {
+                try
+                {
+                action.Invoke();
+                } catch(Exception)
+                {
+                    _logger.Error("Error on executing action");
+                }
+            };
+            _top += 32;
+            parent.Controls.Add(button);
         }
 
-        public IEnumerable<PluginModule> GetSelectedPlugins()
-        {
-            var plugins = _pluginManager.Plugins;
+        public delegate void RenderPluginsModules(IEnumerable<PluginModule> plugins);
 
-            var selectedPlugins = new List<PluginModule>();
-            for (var i = 0; i < PluginsList.Items.Count; i++)
+        private void RenderPluginsModule(IEnumerable<PluginModule> plugins)
+        {
+            if (InvokeRequired)
             {
-                var pluginsListItem = PluginsList.Items[i];
-                if (pluginsListItem.Selected)
-                {
-                    selectedPlugins.Add(plugins[i]);
-                }
+                Invoke(new RenderPluginsModules(RenderPluginsModule));
+                return;
             }
 
-            return selectedPlugins;
-        }
-
-
-        private void RenderPlugins(IEnumerable<PluginModule> plugins)
-        {
             PluginsList.Items.Clear();
 
             foreach (var plugin in plugins)
             {
                 var status = plugin.Enabled ? "ON" : "OFF";
-                var item = new ListViewItem(new[] {plugin.Name, status, plugin.Branch}) {Name = "1"};
+                var item = new ListViewItem(new[] { plugin.Name, status, plugin.Branch }) { Name = "1" };
 
                 PluginsList.Items.Add(item);
                 plugin.PropertyChanged += PluginPropertyChanged;
             }
         }
 
-        private void PluginPropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void UpdatePlugin(PluginModule plugin, String propertyName)
         {
-            var plugin = (PluginModule) sender;
-            var index = _pluginManager.Plugins.IndexOf(plugin);
+            var index = _pluginModuleManager.Plugins.IndexOf(plugin);
 
-            if (e.PropertyName == "enabled")
+            if (propertyName == "enabled")
             {
                 var status = plugin.Enabled ? "ON" : "OFF";
                 PluginsList.Items[index].SubItems[1].Text = status;
             }
 
-            if (e.PropertyName == "branch")
+            if (propertyName == "branch")
             {
                 PluginsList.Items[index].SubItems[2].Text = plugin.Branch;
+            }
+        }
+
+        private void PluginPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            var plugin = (PluginModule)sender;
+
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => UpdatePlugin(plugin, e.PropertyName)));
+            }
+            else
+            {
+                UpdatePlugin(plugin, e.PropertyName);
+            }
+        }
+
+
+        private void SafeOnLogging(object sender, LogEventArgs e)
+        {
+            LogView.SelectionColor = Color.Black;
+            LogView.SelectionBackColor = Color.White;
+            LogView.AppendText(DateTime.Now.ToString("HH:mm:ss") + ": ");
+
+            if (e.Type == MessageType.ERROR)
+            {
+                LogView.SelectionColor = Color.DarkRed;
+                LogView.SelectionBackColor = Color.Yellow;
+            }
+            else if (e.Type == MessageType.OK)
+            {
+                LogView.SelectionColor = Color.Green;
+            }
+            LogView.AppendText(e.Message + Environment.NewLine);
+            LogView.ScrollToCaret();
+        }
+
+        private void OnLogging(object sender, LogEventArgs args)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() => SafeOnLogging(sender, args)));
+            }
+            else
+            {
+                SafeOnLogging(sender, args);
+            }
+        }
+
+        private void PluginsList_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                var contextMenuItem = PluginsList.GetItemAt(e.X, e.Y);
+
+                for (var i = 0; i < PluginsList.Items.Count; i++)
+                {
+                    var pluginsListItem = PluginsList.Items[i];
+                    pluginsListItem.Selected = pluginsListItem == contextMenuItem;
+                }
+
+                contextMenu.Show(Cursor.Position.X, Cursor.Position.Y);
+            }
+        }
+
+        private void PluginsList_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var plugins = _pluginModuleManager.Plugins;
+
+            for (var i = 0; i < PluginsList.Items.Count; i++)
+            {
+                var pluginsListItem = PluginsList.Items[i];
+                plugins[i].Selected = pluginsListItem.Selected;
             }
         }
     }

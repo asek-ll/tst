@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using TsT.Entities;
 
 namespace TsT.Components
 {
-    public class PluginManager
+    public class PluginModuleManager
     {
         private List<PluginModule> _plugins = new List<PluginModule>();
 
@@ -25,6 +26,23 @@ namespace TsT.Components
         {
             var handler = PluginsUpdated;
             if (handler != null) handler(_plugins);
+        }
+
+        public PluginModule getPluginByType<T>()
+        {
+            foreach (var plugin in _plugins)
+            {
+                if (plugin is T)
+                {
+                    return plugin;
+                }
+            }
+            return null;
+        }
+
+        public IEnumerable<PluginModule> GetSelectedPlugins()
+        {
+            return _plugins.Where(plugin => plugin.Selected).ToList();
         }
     }
 }

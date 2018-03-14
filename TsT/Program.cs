@@ -12,9 +12,6 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using Ninject;
 using TsT.Components;
-using TsT.Plugins.ClientProxy;
-using TsT.Plugins.Jira;
-using TsT.Plugins.Mvn;
 
 namespace TsT
 {
@@ -34,17 +31,24 @@ namespace TsT
 
             var kernel = new StandardKernel(new Bindings());
 
-            var plugins = new List<IPlugin>
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
-//                kernel.Get<ClientProxyPlugin>(),
-                kernel.Get<PomReader>(),
-                kernel.Get<JiraPlugin>(),
-            };
-
-            foreach (var plugin in plugins)
-            {
-                plugin.OnInit();
+                var moduleTypes = new List<Type>();
+                foreach (var type in assembly.GetTypes())
+                {
+                    if (type.GetInterface("IModule") != null)
+                    {
+                        var module = kernel.Get(type) as IModule;
+                        module.OnInit();
+                    }
+                }
             }
+
+            var currentDomain = AppDomain.CurrentDomain;
+            currentDomain.UnhandledException += new UnhandledExceptionEventHandler((sender, eventArgs) => {
+                var logger = kernel.Get<Logger>();
+                logger.Error("Domain error " + eventArgs.ToString());
+            });
 
             var mainForm = kernel.Get<MainForm>();
             Application.Run(mainForm);

@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <Import Project="..\packages\Microsoft.Net.Compilers.2.3.2\build\Microsoft.Net.Compilers.props" Condition="Exists('..\packages\Microsoft.Net.Compilers.2.3.2\build\Microsoft.Net.Compilers.props')" />
   <PropertyGroup>
     <ProjectGuid>{979AD0A0-2383-422C-94AD-63039F9B537A}</ProjectGuid>
     <ProjectTypeGuids>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -8,8 +9,11 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>TsT</RootNamespace>
     <AssemblyName>TsT</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <AppDesignerFolder>Properties</AppDesignerFolder>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -30,12 +34,21 @@
     <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>tst.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net40\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Ninject">
       <HintPath>..\packages\Ninject.3.2.2.0\lib\net40\Ninject.dll</HintPath>
@@ -79,28 +92,41 @@
   <ItemGroup>
     <Compile Include="Components\Bindings.cs" />
     <Compile Include="Components\Config.cs" />
+    <Compile Include="Components\Helpers.cs" />
+    <Compile Include="Components\IEnuerable.cs" />
     <Compile Include="Components\IPlugin.cs" />
     <Compile Include="Components\LogEventArgs.cs" />
     <Compile Include="Components\Logger.cs" />
-    <Compile Include="Components\PluginManager.cs" />
+    <Compile Include="Components\PluginModuleManager.cs" />
     <Compile Include="Entities\PomHelper.cs" />
     <Compile Include="Entities\TransasPlugin.cs" />
-    <Compile Include="MainForm.cs" />
+    <Compile Include="MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Plugins\ClientProxy\ClientProxyPlugin.cs" />
-    <Compile Include="Plugins\ClientProxy\ProxyManager.cs" />
-    <Compile Include="Plugins\Jira\JiraManager.cs" />
-    <Compile Include="Plugins\Jira\JiraPlugin.cs" />
-    <Compile Include="Plugins\Jira\JiraRestApiHelper.cs" />
-    <Compile Include="Plugins\Mvn\ParentProject.cs" />
-    <Compile Include="Plugins\Mvn\PomReader.cs" />
+    <Compile Include="Modules\ClientProxy\ClientProxyPlugin.cs" />
+    <Compile Include="Modules\ClientProxy\ProxyManager.cs" />
+    <Compile Include="Modules\Jira\JiraManager.cs" />
+    <Compile Include="Modules\Jira\JiraPlugin.cs" />
+    <Compile Include="Modules\Jira\JiraRemoteServerController.cs" />
+    <Compile Include="Modules\Jira\JiraRestApiHelper.cs" />
+    <Compile Include="Modules\Jira\JiraServerController.cs" />
+    <Compile Include="Modules\Mvn\ParentProject.cs" />
+    <Compile Include="Modules\Mvn\PomReader.cs" />
+    <Compile Include="Modules\Utility\Utility.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Properties\Settings.Designer.cs">
       <DependentUpon>Settings.settings</DependentUpon>
       <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -115,9 +141,19 @@
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.Designer.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Entities" />
+    <Content Include="tst.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Microsoft.Net.Compilers.2.3.2\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Net.Compilers.2.3.2\build\Microsoft.Net.Compilers.props'))" />
+  </Target>
 </Project>

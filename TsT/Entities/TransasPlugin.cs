@@ -12,6 +12,7 @@ namespace TsT.Entities
         private readonly PomWrapper _pomWrapper;
         private bool _enabled = false;
         private string _branch = "";
+        private bool _selected = false;
 
         public string RelativePath { get; set; }
 
@@ -38,6 +39,12 @@ namespace TsT.Entities
         public string Key
         {
             get { return _pomWrapper.GetGroupId() + "." + _pomWrapper.GetArtifactId(); }
+        }
+
+        public bool Selected
+        {
+            get { return _selected; }
+            set { _selected = value; }
         }
 
         public PluginModule(string path)
@@ -75,10 +82,7 @@ namespace TsT.Entities
 
         protected void OnPropertyChanged(string propertyName)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

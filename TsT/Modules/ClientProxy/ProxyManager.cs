@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using Microsoft.Win32;
 using TsT.Components;
 
-namespace TsT.Plugins.ClientProxy
+namespace TsT.Modules.ClientProxy
 {
     public class ProxyManager
     {

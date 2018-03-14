@@ -4,11 +4,14 @@ namespace TsT.Components
 {
     public class LogEventArgs : EventArgs
     {
-        public readonly string Message;
+        public string Message { get; }
 
-        public LogEventArgs(string message)
+        public MessageType Type { get; }
+
+        public LogEventArgs(string message, MessageType type)
         {
             Message = message;
+            Type = type;
         }
     }
 }

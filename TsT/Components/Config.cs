@@ -1,7 +1,8 @@
 ﻿using System;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.IO;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace TsT.Components
 {
@@ -32,6 +33,24 @@ namespace TsT.Components
         {
             return _config.Value<T>(key);
         }
+
+        public T GetPropertyOrDefault<T>(string key, T defaultValue)
+        {
+            var value = GetProperty<T>(key);
+            if (value != null)
+            {
+                return value;
+            }
+
+            return defaultValue;
+        }
+
+        public IEnumerable<T> GetProperties<T>(string key)
+        {
+            return _config[key].Values<T>();
+        }
+
+        public JObject GetRawConfig() => _config;
 
         public void Store()
         {

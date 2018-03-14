@@ -1,4 +1,5 @@
 ﻿using Ninject.Modules;
+using TsT.Modules.Mvn;
 
 namespace TsT.Components
 {
@@ -9,7 +10,9 @@ namespace TsT.Components
             Bind<Logger>().To<Logger>().InSingletonScope();
             Bind<Config>().To<Config>().InSingletonScope();
             Bind<MainForm>().To<MainForm>().InSingletonScope();
-            Bind<PluginManager>().To<PluginManager>().InSingletonScope();
+            Bind<PluginModuleManager>().To<PluginModuleManager>().InSingletonScope();
+            Bind<Utils>().To<Utils>().InSingletonScope();
+            Bind<PomReader>().To<PomReader>().InSingletonScope();
         }
     }
 }
