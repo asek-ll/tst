@@ -34,6 +34,39 @@ namespace TsT.Components
             return tcs.Task;
         }
 
+        public static Task<Tuple<int, string, string>> RunProcessWithOutput(ProcessStartInfo processStartInfo)
+        {
+            var tcs = new TaskCompletionSource<Tuple<int, string, string>>();
+
+            var process = new Process
+            {
+                StartInfo = processStartInfo
+            };
+
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.RedirectStandardError = true;
+            process.StartInfo.CreateNoWindow = true;
+
+            var outputBuilder = new StringBuilder();
+            process.OutputDataReceived += (sender, args) => outputBuilder.Append(args.Data + "\n");
+            var errorBuilder = new StringBuilder();
+            process.ErrorDataReceived += (sender, args) => errorBuilder.Append(args.Data + "\n");
+
+            process.EnableRaisingEvents = true;
+
+            process.Exited +=
+                (sender, args) =>
+                {
+                    tcs.SetResult(Tuple.Create(process.ExitCode, outputBuilder.ToString(), errorBuilder.ToString()));
+                    process.Dispose();
+                };
+            process.Start();
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+            return tcs.Task;
+        }
+
         public async Task OpenDir(string path)
         {
             var fileManager = _config.GetProperty<string>("file.manager");

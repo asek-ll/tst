@@ -20,7 +20,9 @@ namespace TsT.Modules.Jira
         [JsonProperty("url")]
         public string Title { get; set; }
         [JsonProperty("name")]
-        public string Command { get; set; }
+        public string Name { get; set; }
+        [JsonProperty("home")]
+        public string Home { get; set; }
     }
 
     public class JiraPlugin : IModule
@@ -32,6 +34,7 @@ namespace TsT.Modules.Jira
         private readonly PomReader _pomReader;
         private readonly Config _config;
         private readonly JiraServerController _controller;
+        private readonly Utils _utils;
 
         public JiraPlugin(
             PluginModuleManager pluginModuleManager,
@@ -48,6 +51,7 @@ namespace TsT.Modules.Jira
             _mainForm = mainForm;
             _pomReader = pomReader;
             _config = config;
+            _utils = utils;
             _controller = new JiraServerController(_config, _logger, utils);
         }
 
@@ -123,7 +127,12 @@ namespace TsT.Modules.Jira
                     {
                         Text = remoteServer.Title
                     };
-                    remoteServerReloadItem.Click += (s, e) =>  BuildAndRestartRemoteServer(remoteServer);
+                    remoteServerReloadItem.Click += (s, e) =>  {
+
+                        var serverController = new JiraRemoteServerController(_logger, _utils, remoteServer);
+
+                        BuildAndRestartRemoteServer(serverController);
+                    };
 
                     serversMenu.DropDownItems.Add(remoteServerReloadItem);
 
@@ -352,15 +361,21 @@ namespace TsT.Modules.Jira
             }
         }
 
-        private async void BuildAndRestartRemoteServer(RemoteServerEntry server)
+        private async void BuildAndRestartRemoteServer(JiraRemoteServerController serverController)
         {
             var plugins = _pluginModuleManager.GetSelectedPlugins();
             var isSuccessBuild = await _pomReader.Build(plugins);
             if (isSuccessBuild)
             {
-                //await _controller.Kill();
-                //CopyPluginsToJira(plugins);
-                //await _controller.Startup();
+                await serverController.Kill();
+
+                foreach (var plugin in plugins)
+                {
+                    var fileUrl = GetFileUrl(plugin.PomPath);
+                    serverController.CopyPlugin(fileUrl);
+                }
+
+                await serverController.Startup();
             }
         }
     }
