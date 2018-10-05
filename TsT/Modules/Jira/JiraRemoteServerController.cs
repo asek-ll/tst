@@ -15,7 +15,8 @@ namespace TsT.Modules.Jira
         private string _home;
         private Logger _logger;
         private Utils _utils;
-        private string _serverName;
+        private readonly string _serverName;
+        private readonly RemoteServerEntry _remoteServer;
 
         public JiraRemoteServerController(Logger logger, Utils utils, RemoteServerEntry remoteServer)
         {
@@ -23,6 +24,7 @@ namespace TsT.Modules.Jira
             _utils = utils;
             _serverName = remoteServer.Name;
             _home = remoteServer.Home ?? "\\\\" + remoteServer.Name + "\\c$\\Program Files\\Atlassian\\Application Data\\JIRA\\";
+            _remoteServer = remoteServer;
         }
 
         public string PluginDir
@@ -38,7 +40,7 @@ namespace TsT.Modules.Jira
             var result = await Utils.RunProcessWithOutput(new ProcessStartInfo
             {
                 FileName = "tasklist.exe",
-                Arguments =  "/S \\\\" + _serverName + " /FO CSV /FI \"IMAGENAME eq tomcat8.exe.x64\""
+                Arguments = "/S \\\\" + _serverName + " /FO CSV /FI \"IMAGENAME eq tomcat8.exe.x64\""
             });
 
             string output = result.Item2;
@@ -99,7 +101,7 @@ namespace TsT.Modules.Jira
             var res = await Utils.RunProcessWithOutput(new ProcessStartInfo
             {
                 FileName = "sc.exe",
-                Arguments = "\\\\" + _serverName + " query",
+                Arguments = "\\\\" + _serverName + " query state= all",
             });
 
             string output = res.Item2;
@@ -132,8 +134,12 @@ namespace TsT.Modules.Jira
 
         public async Task Startup()
         {
-            var serviceName = await GetServiceName();
-            if ( serviceName == null )
+            var serviceName = _remoteServer.ServiceName;
+            if (serviceName == null)
+            {
+                serviceName = await GetServiceName();
+            }
+            if (serviceName == null)
             {
                 _logger.Log("Can't find service for Jira");
             }

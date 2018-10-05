@@ -23,6 +23,8 @@ namespace TsT.Modules.Jira
         public string Name { get; set; }
         [JsonProperty("home")]
         public string Home { get; set; }
+        [JsonProperty("serviceName")]
+        public string ServiceName { get; set; }
     }
 
     public class JiraPlugin : IModule
@@ -127,7 +129,8 @@ namespace TsT.Modules.Jira
                     {
                         Text = remoteServer.Title
                     };
-                    remoteServerReloadItem.Click += (s, e) =>  {
+                    remoteServerReloadItem.Click += (s, e) =>
+                    {
 
                         var serverController = new JiraRemoteServerController(_logger, _utils, remoteServer);
 
@@ -368,13 +371,11 @@ namespace TsT.Modules.Jira
             if (isSuccessBuild)
             {
                 await serverController.Kill();
-
                 foreach (var plugin in plugins)
                 {
                     var fileUrl = GetFileUrl(plugin.PomPath);
                     serverController.CopyPlugin(fileUrl);
                 }
-
                 await serverController.Startup();
             }
         }
